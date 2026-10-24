@@ -1,1 +1,467 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S K Tournament</title>
+<meta name="description" content="S K Tournament – Free Fire matches, खेलो और जीतो"><meta property="og:title" content="🔥 S K Tournament"><meta property="og:description" content="Free Fire matches खेलो, rank बनाओ, coins जीतो!"><meta property="og:type" content="website">
+<meta name="theme-color" content="#ff6a00"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--bg:#0b0b10;--card:#17171f;--ln:#2d2d3a;--ac:#ff6a00;--gold:#ffc01e;--g:#22c55e;--r:#ef4444;--mu:#9a9aae}
+*{box-sizing:border-box;margin:0;font-family:system-ui,sans-serif}
+body{background:var(--bg);color:#fff;padding-bottom:78px}
+header{background:linear-gradient(90deg,#c2410c,#ff6a00);padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header h1{font-size:17px;flex:1}
+.wal{background:#0f0f16;border:1px solid var(--gold);color:var(--gold);padding:6px 12px;border-radius:20px;font-weight:700;font-size:14px}
+.pg{display:none;padding:12px;max-width:640px;margin:auto}.pg.on{display:block}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-bottom:10px;font-size:14px;line-height:1.6}
+input,textarea,select{width:100%;padding:11px;border-radius:8px;border:1px solid var(--ln);background:#0f0f16;color:#fff;margin-top:6px;font-size:14px}
+label{font-size:13px;color:var(--mu);display:block;margin-top:8px}
+.btn{border:0;border-radius:8px;padding:10px 14px;color:#fff;background:var(--ac);font-size:14px;margin:6px 6px 0 0;cursor:pointer}
+.btn.g{background:var(--g)}.btn.r{background:var(--r)}.btn.o{background:#3b3b4a}.btn.w{width:100%;margin-right:0}
+.btn[disabled]{opacity:.5}
+.mu{color:var(--mu);text-align:center;padding:18px}
+small{color:var(--mu)}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#262633;font-size:12px}
+.tag.live{background:var(--r)}.tag.upcoming{background:var(--ac)}.tag.completed{background:#3b3b4a}
+.shot{max-width:100%;max-height:240px;border-radius:8px;margin-top:6px}
+.mc{background:var(--card);border:1px solid var(--ln);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.mc>img{width:100%;aspect-ratio:16/7;object-fit:cover;display:block}
+.mc .b{padding:12px;font-size:14px;line-height:1.6}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;text-align:center}
+.g3 div{background:#0f0f16;border-radius:8px;padding:6px}.g3 small{display:block;font-size:11px}.g3 b{color:var(--gold)}
+.bar{height:6px;background:#0f0f16;border-radius:4px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--g)}
+.chips{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+.chips b{flex:none;padding:8px 14px;border-radius:20px;background:#262633;font-weight:500;font-size:13px;cursor:pointer}.chips b.on{background:var(--ac)}
+.room{background:#0f0f16;border:1px dashed var(--gold);border-radius:8px;padding:8px;margin-top:8px}
+#ann{background:#3a2c00;color:var(--gold);padding:8px 12px;border-radius:8px;margin-bottom:10px;font-size:13px;display:none}
+#sk_sl{position:relative;overflow:hidden;border-radius:12px;margin-bottom:10px;display:none;background:#0f0f16}
+#sk_sl .tr{display:flex;transition:transform .5s ease}
+#sk_sl .tr img{width:100%;flex:none;display:block;aspect-ratio:16/7;object-fit:cover}
+#sk_sl .dt{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center;gap:5px}
+#sk_sl .dt i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45)}#sk_sl .dt i.on{background:#fff}
+.bn{position:fixed;bottom:0;left:0;right:0;background:#101018;border-top:1px solid var(--ln);display:flex;z-index:6}
+.bn b{flex:1;text-align:center;padding:10px 0 12px;font-size:12px;color:var(--mu);font-weight:500;cursor:pointer}
+.bn b span{display:block;font-size:20px}.bn b.on{color:#fff;background:#17171f}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:20;overflow:auto;padding:14px}
+#mdb{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:14px;max-width:520px;margin:20px auto;font-size:14px;line-height:1.6}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--g);padding:10px 18px;border-radius:20px;display:none;z-index:50;font-size:14px}
+#ptr{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#0f0f16;border:1px solid var(--ln);padding:6px 14px;border-radius:20px;font-size:13px;display:none;z-index:15}
+#auth{max-width:380px;margin:40px auto;padding:20px}#auth h1{text-align:center;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;gap:8px}
+.pre{white-space:pre-wrap}
+.tag.Solo{background:#0ea5e9}.tag.Duo{background:#a855f7}.tag.Squad{background:#16a34a}.tag.hot{background:#dc2626}.tag.free{background:#16a34a}
+.pz{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.pzc{background:#0f0f16;border:1px solid var(--ln);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--gold)}
+.cdn{margin:6px 0 2px;font-weight:700;color:var(--gold);font-size:15px;letter-spacing:1px}
+.cf{position:fixed;top:-30px;font-size:24px;z-index:60;pointer-events:none;animation:fall 2.6s linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(420deg);opacity:.7}}
+.slr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 4px;border-top:1px solid var(--ln);font-size:16px;margin:0;color:#fff}.slr input{width:24px;height:24px;margin:0;flex:none}.slr.tk input{opacity:.4}
+.av{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#3b3b4a;flex:none;vertical-align:middle;margin-right:8px}.av.big{width:72px;height:72px;margin:0;border:2px solid var(--gold)}
+</style></head><body>
+<div id="toast"></div><div id="ptr"></div><div id="md" onclick="if(event.target==this)closeM()"><div id="mdb"></div></div>
 
+<div id="auth">
+ <h1>🔥 S K Tournament</h1><p class="mu" style="padding:6px" id="atl">Login करो</p>
+ <input id="a_un" placeholder="Username" style="display:none">
+ <input id="a_em" type="email" placeholder="Email" autocomplete="username">
+ <input id="a_mb" type="tel" placeholder="Mobile number" style="display:none">
+ <input id="a_pw" type="password" placeholder="Password (कम से कम 6 अक्षर)" autocomplete="current-password">
+ <button class="btn w" id="a_go" onclick="authGo()">Login</button>
+ <button class="btn o w" onclick="authSw()" id="a_sw">नया Account बनाओ</button>
+ <p class="mu" style="font-size:12px">🎮 Free Fire Tournaments · Coins से Entry, Match जीतो</p>
+</div>
+
+<div id="app" style="display:none">
+<header><h1>S K Tournament</h1><button class="wal" id="hw" style="cursor:pointer" onclick="go('wallet')">🪙0</button><button class="wal" style="cursor:pointer" onclick="refreshAll()">🔄</button><button class="wal" style="cursor:pointer" onclick="shareApp('sys')">🔗</button></header>
+
+<div class="pg on" id="p_home">
+ <div id="ann"></div>
+ <div id="sk_sl"><div class="tr" id="sk_tr"></div><div class="dt" id="sk_dt"></div></div>
+ <img id="bnr" class="shot" style="display:none;width:100%;margin:0 0 10px">
+ <div class="chips" id="chips"></div>
+ <div class="chips" id="flt"></div>
+ <div id="ml"></div>
+</div>
+
+<div class="pg" id="p_mine"><div id="mm"></div></div>
+
+<div class="pg" id="p_lead"><div class="chips" id="lchips"></div><div id="ll"></div></div>
+
+<div class="pg" id="p_me">
+ <div class="card"><div style="display:flex;align-items:center;gap:12px"><img id="myav" class="av big" src="" alt=""><div><b id="pn"></b><br><small id="pe"></small></div></div>
+  <label class="btn o" style="display:inline-block;margin:8px 6px 0 0;color:#fff;font-size:14px">📷 फोटो लगाओ<input type="file" accept="image/*" hidden onchange="setAv(this)"></label><button class="btn r" onclick="delAv()">फोटो हटाओ</button>
+  <div id="stats" style="margin-top:6px"></div>
+  <label>Game का नाम (In-game name)</label><input id="p_gn">
+  <label>Free Fire UID</label><input id="p_ff">
+  <label>Mobile</label><input id="p_mb" type="tel">
+  <button class="btn g" onclick="saveP()">Profile Save</button><button class="btn o" onclick="chPw()">Password बदलो</button></div>
+ <div class="card"><b>🔔 Notifications</b> <button class="btn o" style="padding:4px 10px" onclick="askN()">Phone alert चालू करो</button><div id="nl" style="margin-top:6px"></div></div>
+ <div class="card"><b>🔗 App Share करो</b><br><small>दोस्तों को भेजो, Instagram / Facebook पर लगाओ</small>
+  <div style="margin-top:4px"><button class="btn g" onclick="shareApp('copy')">📋 Link Copy</button><button class="btn" onclick="shareApp('sys')">📤 Share</button>
+  <button class="btn o" onclick="shareApp('wa')">WhatsApp</button><button class="btn o" onclick="shareApp('fb')">Facebook</button><button class="btn o" onclick="shareApp('ig')">Instagram</button><button class="btn o" onclick="shareApp('tg')">Telegram</button></div>
+  <small id="shu" style="display:block;margin-top:6px;word-break:break-all"></small></div>
+ <div class="card"><b>📩 Support</b><div id="spt"></div>
+  <textarea id="sp_m" rows="3" placeholder="अपनी problem लिखो"></textarea>
+  <button class="btn w" onclick="sendSup()">भेजो</button></div>
+ <div class="card"><button class="btn o" onclick="info('faq','FAQ')">FAQ</button><button class="btn o" onclick="info('about','About')">About</button><button class="btn o" onclick="info('privacy','Privacy')">Privacy</button><button class="btn o" onclick="info('terms','Terms')">Terms</button><button class="btn o" onclick="info('rules','Rules')">Rules</button><button class="btn g" id="inst" style="display:none" onclick="DP&&DP.prompt()">📲 App Install</button>
+  <button class="btn r" onclick="logout()">Logout</button></div>
+</div>
+
+<div class="pg" id="p_wallet">
+ <div class="card" style="text-align:center"><small>Coins Balance (1 coin = ₹1)</small><div id="wb" style="font-size:34px;font-weight:900;color:var(--gold)">🪙0</div></div>
+ <div class="card"><b>➕ Coins जोड़ो</b>
+  <label>कितने ₹ जोड़ने हैं? (QR उतने का बन जाएगा)</label><input id="d_a" type="number" min="10" inputmode="numeric" oninput="qr()">
+  <div class="chips" style="margin-top:8px"><b onclick="setA(10)">₹10</b><b onclick="setA(20)">₹20</b><b onclick="setA(50)">₹50</b><b onclick="setA(100)">₹100</b></div>
+  <div id="qbox"></div>
+  <label>UTR / Transaction ID (payment के बाद, 12 अंक)</label><input id="d_u" inputmode="numeric" maxlength="12">
+  <button class="btn g w" style="margin-top:10px" onclick="reqDep()">Request भेजो</button></div>
+ <div class="card"><b>🏧 Coins निकालो</b><label>कितने Coins (कम से कम 50)</label><input id="w_a" type="number" inputmode="numeric"><label>UPI ID / Number</label><input id="w_u">
+  <button class="btn w" style="margin-top:10px" onclick="reqW()">Withdraw Request</button></div>
+ <b style="font-size:17px">History</b><div id="txl" class="card" style="margin-top:8px"></div>
+</div>
+
+<div class="bn" id="bn"></div>
+</div>
+
+<script>
+firebase.initializeApp({apiKey:"AIzaSyDYBPwypZak_RUyvLkKopvXf1esZqDAR6Y",authDomain:"free-7d303.firebaseapp.com",databaseURL:"https://free-7d303-default-rtdb.firebaseio.com",projectId:"free-7d303",storageBucket:"free-7d303.firebasestorage.app",messagingSenderId:"245991317206",appId:"1:245991317206:web:66416bc44a5f05a93cb377"});
+const db=firebase.database(),$=id=>document.getElementById(id);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let uid=localStorage.skUser||'',UN={},SLD={},me={},M={},ST={},NT={},TX={},F='upcoming',FM='all',FE='all',LM='earn',CL={},SHOT=null,reg=false;
+const fmt=t=>new Date(+t||0).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2400)}
+function openM(h){$('mdb').innerHTML=h;$('md').style.display='block'}
+function closeM(){$('md').style.display='none';SHOT=null;JID=''}
+
+/* TABS */
+const tabs=[['home','🏠','Home'],['mine','🎮','My Match'],['lead','🏆','Leaders'],['wallet','💰','Wallet'],['me','👤','Profile']];
+$('bn').innerHTML=tabs.map(t=>`<b id="n_${t[0]}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</b>`).join('');
+function go(p){document.querySelectorAll('.pg').forEach(x=>x.classList.toggle('on',x.id=='p_'+p));tabs.forEach(t=>$('n_'+t[0]).classList.toggle('on',t[0]==p));window.scrollTo(0,0);try{localStorage.skTab=p}catch(e){}if(p=='wallet')qr()}
+go(localStorage.skTab&&$('p_'+localStorage.skTab)?localStorage.skTab:'home');
+
+/* AUTH */
+function authSw(){reg=!reg;$('a_un').style.display=$('a_mb').style.display=reg?'block':'none';$('a_go').textContent=reg?'Account बनाओ':'Login';$('a_sw').textContent=reg?'पहले से Account है? Login':'नया Account बनाओ';$('atl').textContent=reg?'नया Account बनाओ':'Login करो'}
+async function authGo(){
+ const e=$('a_em').value.trim().toLowerCase(),p=$('a_pw').value;
+ if(!/^\S+@\S+\.\S+$/.test(e))return alert('सही Email डालो');
+ const s=await db.ref('users').orderByChild('email').equalTo(e).once('value');
+ if(!reg){let f=null;s.forEach(c=>{if(String(c.val().password||'')===p)f=c.key});
+  if(!f)return alert('Email या Password गलत है');localStorage.skUser=uid=f;return start()}
+ const n=$('a_un').value.trim(),m=$('a_mb').value.trim();
+ if(!n||m.length<10||p.length<6)return alert('नाम, 10 अंक का mobile और 6 अक्षर का password डालो');
+ if(s.exists())return alert('यह Email पहले से रजिस्टर है, Login करो');
+ const r=db.ref('users').push();
+ await r.set({uid:r.key,username:n,email:e,mobile:m,password:p,totalWins:0,role:'user',createdAt:Date.now()});
+ localStorage.skUser=uid=r.key;start()}
+function logout(){localStorage.removeItem('skUser');location.reload()}
+async function start(){
+ const s=await db.ref('users/'+uid).once('value');
+ if(!s.exists()){logout();return}
+ $('auth').style.display='none';$('app').style.display='block';
+ db.ref('users/'+uid).on('value',x=>{if(!x.exists()){logout();return}me=x.val();renderMe();renderWal()});
+ db.ref('matches').on('value',x=>{M=x.val()||{};renderHome();renderMine();renderLead();renderStats();refreshSlots();claim()});
+ db.ref('settings').on('value',x=>{ST=x.val()||{};renderSet()});
+ db.ref('sliders').on('value',x=>{SLD=x.val()||{};renderSet()});
+ db.ref('transactions').orderByChild('uid').equalTo(uid).on('value',x=>{TX=x.val()||{};renderTx()});
+ if(!localStorage.skSeenG)localStorage.skSeenG=localStorage.skSeenU=Date.now();
+ db.ref('notifications').limitToLast(30).on('value',x=>{NT=x.val()||{};renderNt();ping(Object.values(NT),'skSeenG')});
+ db.ref('userNotes/'+uid).limitToLast(30).on('value',x=>{UN=x.val()||{};renderNt();ping(Object.values(UN),'skSeenU')});
+ }
+if(uid){$('auth').style.display='none';$('app').style.display='block';start().catch(()=>toast('⚠️ Internet check करो'))}
+
+/* SETTINGS: announcement, banner, slider, payment */
+let sIdx=0,sN=0,sTm,sX=0,sLk=[];
+function sGo(i){if(!sN)return;sIdx=(i+sN)%sN;$('sk_tr').style.transform='translateX(-'+sIdx*100+'%)';document.querySelectorAll('#sk_dt i').forEach((d,j)=>d.classList.toggle('on',j==sIdx));const c=$('sk_ct');if(c)c.textContent=(sIdx+1)+'/'+sN}
+function sAuto(){clearInterval(sTm);if(sN>1)sTm=setInterval(()=>sGo(sIdx+1),3500)}
+function renderSet(){
+ const a=ST.announcement&&ST.announcement.text;$('ann').style.display=a?'block':'none';$('ann').textContent='📢 '+(a||'');
+ const sl=Object.values(Object.keys(SLD).length?SLD:(ST.sliders||{})).sort((x,y)=>(x.ord||0)-(y.ord||0));
+ sN=sl.length;sLk=sl.map(v=>v.link||'');
+ $('sk_sl').style.display=sN?'block':'none';
+ $('sk_tr').innerHTML=sl.map((v,i)=>`<img src="${v.img}" data-i="${i}">`).join('');
+ $('sk_dt').innerHTML=sN>10?'<span id="sk_ct" style="background:#0009;border-radius:10px;padding:1px 8px;font-size:11px"></span>':sl.map(()=>'<i></i>').join('');sIdx=0;sGo(0);sAuto();
+ const b=(ST.content||{}).banner;$('bnr').style.display=(!sN&&b)?'block':'none';if(b)$('bnr').src=b;
+$('shu').textContent=appUrl()||'⚠️ URL set नहीं है (Admin → Settings → App Share Link)';renderHome();renderMine();qr()}
+$('sk_sl').addEventListener('touchstart',e=>{sX=e.touches[0].clientX;clearInterval(sTm)});
+$('sk_sl').addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-sX;if(Math.abs(d)>40)sGo(sIdx+(d<0?1:-1));sAuto()});
+$('sk_sl').addEventListener('click',e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!=null&&sLk[i])window.open(sLk[i],'_blank')});
+function info(k,t){const c=(ST.content||{})[k]||'अभी कुछ नहीं है';
+ openM(`<b>${t}</b><div class="pre" style="margin-top:8px">${esc(c)}</div>${k=='about'&&(ST.content||{}).support?`<p style="margin-top:8px">Support: <b>${esc(ST.content.support)}</b></p>`:''}<button class="btn o w" onclick="closeM()">बंद करो</button>`)}
+
+/* MATCHES */
+const seats=m=>{let s=0;Object.values(m.participants||{}).forEach(p=>{s+=1+Object.values((p&&p.friends)||{}).length});return s};
+const joined=m=>m.participants&&m.participants[uid];
+$('chips').innerHTML=['upcoming','live','completed'].map(s=>`<b id="c_${s}" onclick="F='${s}';renderHome()">${s}</b>`).join('');
+const roomOpen=m=>m.status=='live'||(m.status=='upcoming'&&(+m.startTime||0)-Date.now()<=(+ST.roomMins||15)*60000);
+function card(m){
+ const s=seats(m),mx=+m.maxPlayers||48,j=joined(m),t=m.top10&&m.top10[uid],fee=+m.entryFee||0,pc=s/mx*100;
+ const rp=Object.entries(m.rankPrizes||{}).sort((a,b)=>a[0]-b[0]).map(([r,v])=>`<span class="pzc">#${esc(r)} 🪙${+v||0}</span>`).join('');
+ let act='';
+ if(j){act+=`<span class="tag" style="background:var(--g)">✅ Joined${j.slot?' · Team '+j.slot:''}</span> `;
+  if(m.resultsOpen!==false&&m.status!='upcoming'&&!t)act+=`<button class="btn" onclick="openRes('${m.id}')">${m.results&&m.results[uid]?'Result फिर भेजो':'Result भेजो'}</button>`}
+ else if(m.status=='upcoming'&&s<mx)act=`<button class="btn g w" onclick="openJoin('${m.id}')">Join करो · ${fee?'🪙'+fee:'FREE'}</button>`;
+ else act=`<small>${s>=mx?'Seats भर गईं':'Join बंद'}</small>`;
+ if(m.status=='completed'&&m.top10)act+=` <button class="btn o" onclick="winners('${m.id}')">🏆 Winners</button>`;
+ const pn=Object.keys(m.participants||{}).length;act+=` <button class="btn o" onclick="showPlayers('${m.id}')">👥 Players (${pn})</button>`;
+ const tags=`<span class="tag ${esc(m.mode)}">${esc(m.mode)}</span> ${fee?'<span class="tag" style="background:#a16207">🪙'+fee+'</span>':'<span class="tag free">FREE</span>'} ${(m.status=='upcoming'&&pc>=75&&s<mx)?'<span class="tag hot">🔥 Filling Fast</span>':''}${(m.status=='upcoming'&&s>=mx)?'<span class="tag hot">Full</span>':''}`;
+ let room='';
+ if(j&&m.status!='completed')room=roomOpen(m)?((m.roomId||m.roomPass)?`<div class="room">🔑 Room ID: <b>${esc(m.roomId||'-')}</b><br>Password: <b>${esc(m.roomPass||'-')}</b></div>`:'<div class="room"><small>Admin जल्द Room ID डालेगा</small></div>'):`<div class="room"><small>🔒 Room ID/Password match से ${+ST.roomMins||15} मिनट पहले यहीं दिखेगा</small></div>`;
+ return `<div class="mc">${m.image?`<img src="${m.image}">`:''}<div class="b"><div class="row"><b>${esc(m.title)}</b><span class="tag ${esc(m.status)}">${esc(m.status)}</span></div>
+ <div style="margin:4px 0">${tags}</div>
+ <small>${esc(m.map)} · ${fmt(m.startTime)}</small>
+ ${m.status=='upcoming'?`<div class="cdn" data-t="${+m.startTime||0}">⏳ ${cd(m.startTime)}</div>`:''}
+ <div class="g3"><div><small>Entry</small><b>${fee?'🪙'+fee:'FREE'}</b></div><div><small>Prize Pool</small><b>🪙${+(m.prizePool||m.pool||m.prize)||0}</b></div><div><small>Seats</small><b>${s}/${mx}</b></div></div>
+ <div class="bar"><i style="width:${Math.min(100,pc)}%"></i></div><small>${s}/${mx} seats</small>
+ ${m.description?`<div class="pre" style="margin-top:4px"><small>${esc(m.description)}</small></div>`:''}
+ ${rp?'<div class="pz">'+rp+'</div>':''}
+ ${room}
+ ${t?`<div class="room" style="border-color:var(--g)">🎉 Result approved · Rank ${t.rank>0?'#'+t.rank:'-'} · Kills ${t.kills} · Points ${pts(t)}</div>`:(j&&m.results&&m.results[uid]?'<div class="room"><small>Result भेज दिया, admin approve करेगा</small></div>':'')}
+ <div style="margin-top:6px">${act}</div></div></div>`}
+function renderHome(){
+ ['upcoming','live','completed'].forEach(s=>$('c_'+s).classList.toggle('on',s==F));
+ $('flt').innerHTML=['all','Solo','Duo','Squad','free'].map(x=>`<b class="${FM==x?'on':''}" onclick="FM='${x}';renderHome()">${x=='all'?'सब Mode':x=='free'?'🆓 Free':x}</b>`).join('');
+ const a=Object.values(M).filter(m=>m.status==F&&(FM=='all'||(FM=='free'?!(+m.entryFee):m.mode==FM))).sort((x,y)=>F=='completed'?(y.startTime||0)-(x.startTime||0):(x.startTime||0)-(y.startTime||0));
+ $('ml').innerHTML=a.map(m=>card(m)).join('')||'<div class="mu">कोई match नहीं</div>'}
+function renderMine(){
+ const a=Object.values(M).filter(joined).sort((x,y)=>(y.startTime||0)-(x.startTime||0));
+ $('mm').innerHTML=a.map(m=>card(m)).join('')||'<div class="mu">आपने अभी कोई match join नहीं किया</div>'}
+
+/* JOIN */
+let SLOT=0,JID='',JB=0;
+function pickSlot(i,el){document.querySelectorAll('.slr input').forEach(x=>{if(x!==el&&!x.disabled)x.checked=false});SLOT=el.checked?i:0}
+function openJoin(id){
+ const m=M[id],need=m.mode=='Squad'?3:m.mode=='Duo'?1:0,per=1+need,tot=Math.max(1,Math.floor((+m.maxPlayers||48)/per)),tk=m.slots||{};SLOT=0;
+ let fr='';for(let i=1;i<=need;i++)fr+=`<label>दोस्त ${i} का नाम</label><input id="fn${i}"><label>दोस्त ${i} का Free Fire UID</label><input id="fu${i}" type="tel">`;
+ const rows=slotRows(m,per,tot);JID=id;
+ openM(`<b>Joining Match</b> · ${esc(m.title)} <small>(${esc(m.mode)})</small>
+ <p style="margin:6px 0">Entry: <b style="color:var(--gold)">🪙${(+m.entryFee||0)*per}</b> · Balance: 🪙${bal()}</p>
+ <label>आपका In-game नाम</label><input id="j_gn" value="${esc(me.gname||'')}">
+ <label>आपका Free Fire UID</label><input id="j_ff" type="tel" value="${esc(me.ffuid||'')}">${fr}
+ <label style="margin-top:12px">अपनी Team / Slot चुनो (एक ही)</label>
+ <div id="slrows" style="max-height:42vh;overflow:auto;margin-top:4px;border-bottom:1px solid var(--ln)">${rows}</div>
+ 
+ <button class="btn g w" onclick="doJoin('${id}',${need})">Join Now</button><button class="btn o w" onclick="closeM()">Cancel</button>`);fillAv($('mdb'))}
+async function doJoin(id,need){
+ if(JB)return;
+ const m=M[id],gn=$('j_gn').value.trim(),ff=$('j_ff').value.trim();
+ if(!gn||!ff)return alert('अपना नाम और UID डालो');
+ if(!/^\d{6,12}$/.test(ff))return alert('सही Free Fire UID डालो (सिर्फ अंक)');
+ if(!SLOT)return alert('अपनी Team / Slot चुनो');
+ const friends={};
+ for(let i=1;i<=need;i++){const n=$('fn'+i).value.trim(),u=$('fu'+i).value.trim();if(!n||!u)return alert('दोस्त '+i+' की पूरी जानकारी डालो');if(!/^\d{6,12}$/.test(u))return alert('दोस्त '+i+' की सही UID डालो (सिर्फ अंक)');friends['f'+i]={name:n,uid:u}}
+ JB=1;
+ try{
+ const fresh=(await db.ref('matches/'+id).once('value')).val();
+ if(!fresh||fresh.status!='upcoming')return alert('Join बंद हो गया');
+ if(fresh.participants&&fresh.participants[uid])return alert('आप पहले से Join हो');
+ const n=1+need,mx=+fresh.maxPlayers||48;
+ if(seats(fresh)+n>mx)return alert('इतनी seats खाली नहीं हैं');
+  const slot=SLOT,cs=await db.ref('matches/'+id+'/slots/'+slot).transaction(c=>c?undefined:uid);
+ if(!cs.committed)return alert('यह Team slot किसी और ने ले ली, दूसरी चुनो');
+ const tot=(+fresh.entryFee||0)*n;
+ if(tot>0){const w=await db.ref('users/'+uid+'/wallet').transaction(c=>(+c||0)>=tot?(+c||0)-tot:undefined);
+  if(!w.committed){await db.ref('matches/'+id+'/slots/'+slot).remove();return alert('Coins कम हैं (चाहिए 🪙'+tot+'). Wallet में Coins जोड़ो।')}}
+ const p={name:gn,ffuid:ff,username:me.username||'',seats:n,slot:slot,paid:tot};if(need)p.friends=friends;
+ try{await db.ref('matches/'+id+'/participants/'+uid).set(p)}
+ catch(e){await db.ref('matches/'+id+'/slots/'+slot).remove();if(tot>0)await db.ref('users/'+uid+'/wallet').transaction(c=>(+c||0)+tot);return alert('Join नहीं हो पाया, Coins वापस कर दिए')}
+ if(tot>0)await db.ref('transactions').push({uid,username:me.username||'',type:'entry',amount:tot,status:'success',note:fresh.title,createdAt:Date.now()});
+ await db.ref('users/'+uid).update({gname:gn,ffuid:ff});
+ closeM();toast('✅ Match Join हो गया');confetti();setTimeout(()=>showPlayers(id),700)
+ }catch(e){alert('कुछ गड़बड़ हुई, internet check करके दोबारा try करो')}
+ JB=0}
+
+/* RESULT + SCREENSHOT (database में, compress करके) */
+function openRes(id){
+ const m=M[id],need=ST.screenshotEnabled!==false,jj=joined(m)||{};
+ const ap=Object.entries(m.top10||{}).map(([u,t])=>Object.assign({u:u},t)).sort((x,y)=>(x.rank>0?x.rank:99)-(y.rank>0?y.rank:99));
+ const pl=Object.entries(m.participants||{}).map(([u,p])=>Object.assign({u:u},p)).sort((x,y)=>(x.slot||999)-(y.slot||999));
+ const who=`<div class="row" style="align-items:center;margin:8px 0"><span style="display:flex;align-items:center">${avh(uid)}<span><b>${esc(jj.name||me.username||'Player')}</b> (आप)<br><small>${jj.slot?'Team '+jj.slot:''}</small></span></span></div>
+ ${ap.length?'<small>अब तक approved results:</small>'+ap.map(t=>`<div class="row" style="padding:3px 0"><span>${avh(t.u)}${t.rank>0?'#'+t.rank:'•'} ${esc(t.username||'Player')}</span><small>Kills ${+t.kills||0}</small></div>`).join(''):''}
+ <details style="margin-top:6px"><summary style="cursor:pointer;color:var(--mu)">👥 Match के Players (${pl.length})</summary>${pl.map(p=>`<div style="padding:4px 0;display:flex;align-items:center">${avh(p.u)}<span>${esc(p.name||p.username||'Player')}${p.slot?' <small>· Team '+p.slot+'</small>':''}</span></div>`).join('')}</details>`;
+ let ro='<option value="0">Top 10 से बाहर</option>';for(let i=1;i<=10;i++)ro+=`<option value="${i}">Rank #${i}</option>`;
+ openM(`<b>Result भेजो</b> <small>${esc(m.title)}</small>${who}
+ <label>आपकी Rank</label><select id="r_rk">${ro}</select>
+ <label>आपकी Kills</label><input id="r_kl" type="number" min="0" max="60" value="0">
+ ${need?`<label>Result Screenshot (ज़रूरी)</label><input type="file" accept="image/*" onchange="pickShot(this)"><img id="r_pv" class="shot" style="display:none">`:''}
+ <p><small>गलत result भेजने पर reject हो सकता है।</small></p>
+ <button class="btn g w" onclick="sendRes('${id}',${need})">Submit</button><button class="btn o w" onclick="closeM()">Cancel</button>`);fillAv($('mdb'))}
+function pickShot(inp){const f=inp.files[0];if(!f)return;
+ if(!/^image\//.test(f.type))return alert('सिर्फ फोटो चुनो');
+ if(f.size>8e6)return alert('फोटो बहुत बड़ी है (8MB से कम चुनो)');
+ const rd=new FileReader();
+ rd.onload=()=>{const im=new Image();im.onload=()=>{const sc=Math.min(1,900/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+  SHOT=c.toDataURL('image/jpeg',0.7);const p=$('r_pv');p.src=SHOT;p.style.display='block'};
+  im.onerror=()=>alert('यह फोटो खुल नहीं पाई');im.src=rd.result};rd.readAsDataURL(f)}
+let SB=0;
+async function sendRes(id,need){
+ if(SB)return;
+ const m=M[id];if(!m||m.resultsOpen===false)return alert('Result submit बंद है');
+ if(m.status=='upcoming')return alert('Match शुरू होने के बाद भेजो');
+ if(m.top10&&m.top10[uid])return alert('आपका result approve हो चुका है');
+ if(need&&!SHOT)return alert('Screenshot चुनो');
+ const rk=+$('r_rk').value,kl=+$('r_kl').value;
+ if(!(kl>=0&&kl<=60))return alert('Kills 0 से 60 के बीच डालो');
+ SB=1;const b=document.querySelector('#mdb .btn.g');if(b){b.disabled=true;b.textContent='भेज रहा है...'}
+ try{
+  if(need)await db.ref('shots/'+id+'/'+uid).set(SHOT);
+  await db.ref('matches/'+id+'/results/'+uid).set({username:me.username||'',rank:rk,kills:Math.floor(kl),at:Date.now()});
+  closeM();toast('✅ Result भेज दिया')
+ }catch(e){alert('भेज नहीं पाया, internet check करो');if(b){b.disabled=false;b.textContent='Submit'}}
+ SB=0}
+
+/* ===== WALLET (Coins) ===== */
+const bal=()=>+me.wallet||0;let WB=0,CLB=0;
+function renderWal(){const b='🪙'+bal();$('hw').textContent=b;$('wb').textContent=b}
+function renderTx(){const l=Object.values(TX).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,50),pl=['deposit','prize','win','bonus','refund'];
+ $('txl').innerHTML=l.map(t=>{const p=pl.includes(t.type);return `<div class="row" style="border-top:1px solid var(--ln);padding:8px 0"><span><b>${esc(t.note||({deposit:'Coins जोड़े',withdraw:'निकासी',entry:'Entry fee'}[t.type])||t.type)}</b><br><small>${fmt(t.createdAt)}</small></span><span style="text-align:right"><b style="color:${p?'var(--g)':'var(--r)'}">${p?'+':'−'}🪙${+t.amount||0}</b><br><small>${esc(t.status)}</small></span></div>`}).join('')||'<div class="mu">कोई transaction नहीं</div>'}
+function PAY(){const p=ST.pay||{};return{upi:String(p.upi||p.upiId||'').trim(),upn:p.upn||p.name||'S K Tournament',qr:p.qr&&/^(data:image|https?:)/i.test(p.qr)?p.qr:''}}
+function upiLink(a){const p=PAY();return p.upi?'upi://pay?pa='+encodeURIComponent(p.upi)+'&pn='+encodeURIComponent(p.upn)+(a>0?'&am='+a+'&cu=INR&tn=SKWallet':'&cu=INR'):''}
+function setA(v){$('d_a').value=v;qr()}
+function qr(){const b=$('qbox');if(!b)return;const p=PAY(),a=+$('d_a').value||0,u=upiLink(a);
+ if(!p.upi&&!p.qr){b.innerHTML='<div class="mu">Admin ने अभी UPI / QR नहीं डाला है।</div>';return}
+ const key=u+'|'+p.qr.length+'|'+(window.QRCode?1:0);if(b.dataset.k==key)return;b.dataset.k=key;
+ b.innerHTML='<div id="qrc" style="background:#fff;border-radius:12px;padding:12px;width:fit-content;margin:10px auto"></div><div style="text-align:center">'+(a>0?'<b style="color:var(--gold);font-size:20px">₹'+a+'</b> भेजो<br>':'')+(p.upi?'UPI: <b>'+esc(p.upi)+'</b>':'')+'</div>'+(a>0&&u?'<a class="btn g w" style="display:block;text-align:center;text-decoration:none" href="'+esc(u)+'">📱 UPI app में खोलो</a>':'');
+ const q=$('qrc');
+ if(p.qr)q.innerHTML='<img src="'+esc(p.qr)+'" style="width:220px;display:block" alt="QR">';
+ else if(u&&window.QRCode){try{new QRCode(q,{text:u,width:220,height:220})}catch(e){q.textContent='UPI ID से सीधे भेजो'}}
+ else q.textContent='UPI ID से सीधे भेजो'}
+window.addEventListener('load',()=>setTimeout(qr,800));
+async function reqDep(){if(WB)return;const a=Math.floor(+$('d_a').value),u=$('d_u').value.trim();
+ if(!(a>=10))return alert('कम से कम ₹10 डालो');if(!/^\d{12}$/.test(u))return alert('12 अंक का सही UTR डालो');
+ WB=1;try{
+  if((await db.ref('transactions').orderByChild('utr').equalTo(u).once('value')).exists())return alert('यह UTR पहले use हो चुका है');
+  await db.ref('transactions').push({uid,username:me.username||'',type:'deposit',amount:a,utr:u,status:'pending',createdAt:Date.now()});
+  $('d_a').value=$('d_u').value='';qr();toast('✅ Request भेज दी, admin approve करेगा')
+ }catch(e){alert('भेज नहीं पाया, internet check करो')}finally{WB=0}}
+async function reqW(){if(WB)return;const a=Math.floor(+$('w_a').value),u=$('w_u').value.trim();
+ if(!(a>=50))return alert('कम से कम 🪙50 निकाल सकते हो');if(!/^[\w.\-]+@[\w]+$|^\d{10}$/.test(u))return alert('सही UPI ID या 10 अंक का number डालो');
+ WB=1;try{
+  const w=await db.ref('users/'+uid+'/wallet').transaction(c=>(+c||0)>=a?(+c||0)-a:undefined);
+  if(!w.committed)return alert('Balance कम है');
+  await db.ref('transactions').push({uid,username:me.username||'',type:'withdraw',amount:a,upi:u,status:'pending',createdAt:Date.now()});
+  $('w_a').value=$('w_u').value='';toast('✅ Request भेज दी')
+ }catch(e){alert('भेज नहीं पाया, internet check करो')}finally{WB=0}}
+/* Match cancel होने पर Entry के Coins अपने आप वापस */
+async function claim(){if(CLB||!uid)return;CLB=1;try{
+ for(const m of Object.values(M)){const j=joined(m);if(m.status!='cancelled'||!j||(m.refunds&&m.refunds[uid]))continue;
+  const r=await db.ref('matches/'+m.id+'/refunds/'+uid).transaction(c=>c?undefined:true);if(!r.committed)continue;
+  const amt=+j.paid||0;
+  if(amt>0){await db.ref('users/'+uid+'/wallet').transaction(c=>(+c||0)+amt);
+   await db.ref('transactions').push({uid,type:'refund',amount:amt,status:'success',note:'Refund: '+m.title,createdAt:Date.now()});toast('💰 Match cancel – 🪙'+amt+' वापस मिले')}}
+ }catch(e){}CLB=0}
+
+/* PROFILE / NOTIFICATIONS / SUPPORT */
+function renderMe(){$('pn').textContent=me.username||'';$('pe').textContent=(me.email||'')+(me.role=='admin'?' · admin':'');
+ $('myav').dataset.av=uid;fillAv($('p_me')).then(renderMyAv);
+ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#p_me'))return;
+ $('p_gn').value=me.gname||'';$('p_ff').value=me.ffuid||'';$('p_mb').value=me.mobile||''}
+const saveP=()=>db.ref('users/'+uid).update({gname:$('p_gn').value.trim(),ffuid:$('p_ff').value.trim(),mobile:$('p_mb').value.trim()}).then(()=>toast('✅ Profile save'));
+async function chPw(){
+ if((prompt('मौजूदा Password')||'')!==String(me.password||''))return alert('मौजूदा Password गलत है');
+ const p=prompt('नया Password (कम से कम 6 अक्षर)','');if(!p)return;if(p.length<6)return alert('कम से कम 6 अक्षर');
+ await db.ref('users/'+uid).update({password:p});toast('✅ Password बदल गया')}
+function ping(a,key){const seen=+localStorage[key]||0;let mx=seen;
+ a.forEach(n=>{if((n.date||0)>seen){mx=Math.max(mx,n.date);buzz(n)}});if(mx>seen)localStorage[key]=mx}
+function buzz(n){toast('🔔 '+n.title);try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+ try{if(window.Notification&&Notification.permission=='granted')new Notification(n.title,{body:n.msg})}catch(e){}}
+function askN(){if(!window.Notification)return alert('इस browser में notification support नहीं है');
+ Notification.requestPermission().then(p=>toast(p=='granted'?'✅ Notification चालू':'Notification की permission नहीं मिली'))}
+function renderNt(){$('nl').innerHTML=Object.values(NT).concat(Object.values(UN)).sort((a,b)=>(b.date||0)-(a.date||0)).map(n=>`<div style="border-top:1px solid var(--ln);padding:6px 0"><b>${esc(n.title)}</b><br>${esc(n.msg)}<br><small>${fmt(n.date)}</small></div>`).join('')||'<div class="mu">कोई notification नहीं</div>'}
+async function sendSup(){const m=$('sp_m').value.trim();if(!m)return alert('Message लिखो');
+ await db.ref('support').push({msg:m,email:me.email||'',uid:uid,time:Date.now()});$('sp_m').value='';toast('✅ भेज दिया')}
+
+/* REFRESH: 🔄 button + नीचे खींचकर + app वापस खुलने / internet आने पर */
+function renderAll(){renderHome();renderMine();renderSet();renderMe();renderWal();renderNt();renderLead();renderStats()}
+let RF=0;
+async function refreshAll(){
+ if(RF||!uid)return;RF=1;toast('🔄 Refresh हो रहा है...');
+ try{db.goOffline();db.goOnline();
+  const r=await Promise.race([Promise.all([db.ref('users/'+uid).once('value'),db.ref('matches').once('value'),db.ref('settings').once('value')]),new Promise((_,j)=>setTimeout(j,8000))]);
+  me=r[0].val()||me;M=r[1].val()||{};ST=r[2].val()||{};renderAll();claim();toast('✅ अपडेट हो गया')}
+ catch(e){toast('⚠️ Internet check करो')}
+ RF=0}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&uid){try{db.goOnline()}catch(e){}}});
+window.addEventListener('online',()=>{if(uid)refreshAll()});
+(function(){let y0=-1,pull=0;const p=$('ptr');
+ document.addEventListener('touchstart',e=>{y0=(window.scrollY<=0&&$('md').style.display!='block')?e.touches[0].clientY:-1;pull=0},{passive:true});
+ document.addEventListener('touchmove',e=>{if(y0<0)return;pull=e.touches[0].clientY-y0;if(pull>20){p.textContent=pull>80?'⬇ छोड़ो — Refresh होगा':'⬇ नीचे खींचो';p.style.display='block'}else p.style.display='none'},{passive:true});
+ document.addEventListener('touchend',()=>{p.style.display='none';if(y0>=0&&pull>80)refreshAll();y0=-1;pull=0});
+})();
+
+/* ===== countdown, winners, leaderboard, stats, confetti, reminder, install ===== */
+function cd(t){const d=(+t||0)-Date.now();if(d<=0)return 'शुरू होने वाला है';const h=Math.floor(d/3600000),mi=Math.floor(d%3600000/60000),sc=Math.floor(d%60000/1000),dd=Math.floor(h/24),p=n=>String(n).padStart(2,'0');return (dd?dd+'d ':'')+p(h%24)+':'+p(mi)+':'+p(sc)}
+function today(){return new Date().toLocaleDateString('en-CA')}
+function confetti(){const e=['🎉','🏆','✨','🔥','🎊','💰'];for(let i=0;i<36;i++){const x=document.createElement('span');x.className='cf';x.textContent=e[i%e.length];x.style.left=Math.random()*100+'vw';x.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(x);setTimeout(()=>x.remove(),3600)}}
+function winners(id){const m=M[id],a=Object.entries(m.top10||{}).map(([u,t])=>Object.assign({u:u},t)).sort((x,y)=>(x.rank>0?x.rank:99)-(y.rank>0?y.rank:99));
+ openM(`<b>🏆 ${esc(m.title)} – Winners</b>`+(a.map(t=>`<div class="row" style="border-top:1px solid var(--ln);padding:6px 0;${t.u==uid?'color:var(--gold)':''}"><span>${avh(t.u)}${t.rank>0?(['🥇','🥈','🥉'][t.rank-1]||'#'+t.rank):'•'} ${esc(t.username||'Player')}<br><small>Kills ${+t.kills||0}</small></span><b>${pts(t)} pts</b></div>`).join('')||'<div class="mu">अभी winners नहीं</div>')+'<button class="btn o w" onclick="closeM()">बंद करो</button>');fillAv($('mdb'))}
+function pts(t){const R={1:20,2:15,3:12,4:10,5:8,6:6,7:5,8:4,9:3,10:2};return (R[+t.rank]||0)+2*(+t.kills||0)}
+function agg(){const A={};Object.values(M).forEach(m=>Object.entries(m.top10||{}).forEach(([u,t])=>{const a=A[u]||(A[u]={u:u,n:t.username||'Player',w:0,k:0,e:0,p:0});a.p++;if(+t.rank==1)a.w++;a.k+=+t.kills||0;a.e+=pts(t)}));return A}
+function renderLead(){
+ $('lchips').innerHTML=[['earn','⭐ Points'],['w','🥇 Wins'],['k','🎯 Kills']].map(x=>`<b class="${LM==x[0]?'on':''}" onclick="LM='${x[0]}';renderLead()">${x[1]}</b>`).join('');
+ const key={earn:'e',w:'w',k:'k'}[LM];
+ const a=Object.values(agg()).filter(x=>x[key]>0).sort((x,y)=>y[key]-x[key]||y.e-x.e).slice(0,20);
+ $('ll').innerHTML=a.map((x,i)=>`<div class="card row" style="align-items:center${x.u==uid?';border-color:var(--gold)':''}"><span>${avh(x.u)}<b>${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</b> ${esc(x.n)}${x.u==uid?' (आप)':''}<br><small>${x.p} match · ${x.w} wins · ${x.k} kills</small></span><b style="color:var(--gold)">${LM=='earn'?x.e+' pts':LM=='w'?x.w:x.k}</b></div>`).join('')||'<div class="mu">अभी कोई result नहीं</div>';fillAv($('ll'))}
+function renderStats(){const A=agg()[uid]||{w:0,k:0,e:0},pl=Object.values(M).filter(joined).length;
+ $('stats').innerHTML=`<div class="g3" style="grid-template-columns:repeat(4,1fr)"><div><small>Matches</small><b>${pl}</b></div><div><small>Wins</small><b>${A.w}</b></div><div><small>Kills</small><b>${A.k}</b></div><div><small>Points</small><b>${A.e}</b></div></div>`}
+function renderBon(){}
+setInterval(()=>{document.querySelectorAll('.cdn').forEach(e=>e.textContent='⏳ '+cd(+e.dataset.t))},1000);
+let RS='';
+setInterval(()=>{if(!uid||$('app').style.display=='none')return;
+ Object.values(M).filter(m=>joined(m)&&m.status=='upcoming').forEach(m=>{const d=(+m.startTime||0)-Date.now();
+  if(d>0&&d<=600000&&!localStorage['rm_'+m.id]){try{localStorage['rm_'+m.id]=1}catch(e){}buzz({title:'⏰ Match शुरू होने वाला है',msg:m.title})}});
+ const sig=Object.values(M).filter(joined).map(m=>m.id+roomOpen(m)).join();if(sig!==RS){RS=sig;renderHome();renderMine()}},15000);
+let DP=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;const b=$('inst');if(b)b.style.display='inline-block'});
+(function(){try{const ic='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#ff6a00"/><text x="96" y="132" font-size="110" text-anchor="middle">🔥</text></svg>');
+ const mf={name:'S K Tournament',short_name:'SK Tourney',start_url:location.href,display:'standalone',background_color:'#0b0b10',theme_color:'#ff6a00',icons:[{src:ic,sizes:'192x192',type:'image/svg+xml'}]};
+ const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));document.head.appendChild(l)}catch(e){}})();
+
+/* ===== PLAYER PROFILE PHOTO (avatars/UID) ===== */
+const AV={},PH='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#3b3b4a"/><circle cx="20" cy="15" r="7" fill="#9a9aae"/><path d="M6 36c2-9 26-9 28 0z" fill="#9a9aae"/></svg>');
+const avh=u=>`<img class="av" data-av="${esc(u)}" src="${PH}">`;
+async function fillAv(root){const els=[...(root||document).querySelectorAll('img[data-av]')],need=[...new Set(els.map(e=>e.dataset.av))].filter(u=>!(u in AV));
+ await Promise.all(need.map(async u=>{try{AV[u]=(await db.ref('avatars/'+u).once('value')).val()||''}catch(e){AV[u]=''}}));
+ els.forEach(e=>{const v=AV[e.dataset.av];if(v)e.src=v})}
+function renderMyAv(){const e=$('myav');if(e)e.src=AV[uid]||PH}
+function setAv(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{const im=new Image();im.onload=async()=>{const k=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,160,160);x.drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,160,160);
+  const d=c.toDataURL('image/jpeg',0.8);await db.ref('avatars/'+uid).set(d);AV[uid]=d;renderMyAv();toast('✅ फोटो लग गई')};
+  im.onerror=()=>alert('फोटो खुल नहीं पाई');im.src=rd.result};rd.readAsDataURL(f);inp.value=''}
+async function delAv(){await db.ref('avatars/'+uid).remove();AV[uid]='';renderMyAv();toast('फोटो हट गई')}
+
+/* ===== SHARE ===== */
+const APP_URL_DEFAULT='';/* चाहो तो यहाँ अपने app का पक्का URL लिख दो, जैसे 'https://aapka-site.com/' */
+function appUrl(){let u=String((ST.share||{}).url||'').trim()||APP_URL_DEFAULT;
+ if(u&&!/^https?:\/\//i.test(u))u='https://'+u;
+ if(u)return u;
+ const l=location;if(/^https?:$/.test(l.protocol)&&!/^(localhost|127\.|192\.168\.|10\.)/.test(l.hostname))return l.href.split('#')[0].split('?')[0];
+ return ''}
+function shareMsg(){return String((ST.share||{}).msg||'').trim()||'🔥 S K Tournament में Free Fire match खेलो और जीतो! यहाँ join करो:'}
+async function copyTxt(t){try{await navigator.clipboard.writeText(t)}catch(e){const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(_){}x.remove()}}
+function noUrl(){openM('<b>⚠️ App का URL set नहीं है</b><p style="margin-top:8px">Share के लिए app का पक्का (https://...) link चाहिए। Admin को बोलो: <b>Admin → Settings → App Share Link</b> में URL डाल दे।</p><button class="btn o w" onclick="closeM()">ठीक है</button>')}
+async function openLink(url,u){let o=null;try{o=window.open(url,'_blank')}catch(e){}if(!o){await copyTxt(u);toast('✅ Link copy हो गया, उस app में paste करो')}}
+async function shareApp(w){const u=appUrl();if(!u)return noUrl();const m=shareMsg(),eu=encodeURIComponent(u);
+ if(w=='copy'){await copyTxt(u);return toast('✅ Link copy हो गया')}
+ if(w=='sys'){if(navigator.share){try{await navigator.share({title:'S K Tournament',text:m,url:u})}catch(e){if(e&&e.name!='AbortError'){await copyTxt(u);toast('✅ Link copy हो गया')}}return}await copyTxt(u);return toast('✅ Link copy हो गया')}
+ if(w=='wa')return openLink('https://wa.me/?text='+encodeURIComponent(m+' '+u),u);
+ if(w=='fb')return openLink('https://www.facebook.com/sharer/sharer.php?u='+eu,u);
+ if(w=='tg')return openLink('https://t.me/share/url?url='+eu+'&text='+encodeURIComponent(m),u);
+ if(w=='ig'){await copyTxt(u);openM(`<b>📸 Instagram पर लगाओ</b><p style="margin-top:8px">✅ Link copy हो गया।<br>Instagram खोलकर <b>Story (link sticker)</b>, <b>Bio</b> या किसी <b>DM</b> में paste कर दो।</p><a class="btn g w" style="display:block;text-align:center;text-decoration:none" href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram खोलो</a><button class="btn o w" onclick="closeM()">बंद करो</button>`)}}
+
+/* ===== PLAYERS LIST (कौन join है) ===== */
+function showPlayers(id){const m=M[id];if(!m)return;
+ const a=Object.entries(m.participants||{}).map(([u,p])=>Object.assign({u:u},p)).sort((x,y)=>(x.slot||999)-(y.slot||999));
+ openM(`<b>👥 ${esc(m.title)} – Joined Players (${a.length})</b>`+(a.map(p=>{const fr=Object.values(p.friends||{}).map(f=>esc(f.name)).join(', ');
+  return `<div class="row" style="align-items:center;border-top:1px solid var(--ln);padding:8px 0;${p.u==uid?'color:var(--gold)':''}"><span style="display:flex;align-items:center">${avh(p.u)}<span><b>${esc(p.name||p.username||'Player')}</b>${p.u==uid?' (आप)':''}${fr?'<br><small>+ '+fr+'</small>':''}</span></span><span class="tag">${p.slot?'Team '+p.slot:'—'}</span></div>`}).join('')||'<div class="mu">अभी किसी ने join नहीं किया</div>')+'<button class="btn o w" onclick="closeM()">बंद करो</button>');fillAv($('mdb'))}
+
+/* ===== SLOT MAP: कौन किस Team में है (live) ===== */
+function slotRows(m,per,tot){const nm={};Object.entries(m.participants||{}).forEach(([u,p])=>{if(p&&p.slot)nm[p.slot]={u:u,n:p.name||p.username||'Player'}});const tk=m.slots||{};let h='';
+ for(let i=1;i<=tot;i++){const t=!!tk[i],b=nm[i];
+  h+=`<label class="slr${t?' tk':''}"><span style="display:flex;align-items:center">${t&&b?avh(b.u):''}<span><b>Team ${i}</b><br>${t?(b?'<span style="color:#fff">👤 '+esc(b.n)+'</span>':'<small>भर गई</small>'):'<small style="color:var(--g)">खाली</small>'}</span></span><span>${per}</span><input type="checkbox" ${t?'disabled':''} ${SLOT==i?'checked':''} onchange="pickSlot(${i},this)"></label>`}
+ return h}
+function refreshSlots(){const m=M[JID],el=$('slrows');if(!JID||!m||!el||$('md').style.display!='block')return;
+ const need=m.mode=='Squad'?3:m.mode=='Duo'?1:0,per=1+need,tot=Math.max(1,Math.floor((+m.maxPlayers||48)/per));
+ if(SLOT&&(m.slots||{})[SLOT]&&m.slots[SLOT]!=uid){SLOT=0;toast('आपकी चुनी Team किसी और ने ले ली')}
+ el.innerHTML=slotRows(m,per,tot);fillAv(el)}
+</script></body></html>
